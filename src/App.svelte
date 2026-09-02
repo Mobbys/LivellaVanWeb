@@ -3,9 +3,10 @@
   import Level from './ui/Level.svelte'
   import SensorDebug from './ui/SensorDebug.svelte'
   import Stations from './ui/Stations.svelte'
+  import TransferWizard from './ui/TransferWizard.svelte'
   import Vehicle from './ui/Vehicle.svelte'
 
-  type View = 'level' | 'stations' | 'vehicle' | 'calibrate' | 'debug'
+  type View = 'level' | 'stations' | 'vehicle' | 'calibrate' | 'transfer' | 'debug'
 
   let view = $state<View>('level')
 
@@ -20,16 +21,18 @@
 {#if view === 'level'}
   <Level oncalibrate={() => (view = 'calibrate')} />
 {:else if view === 'stations'}
-  <Stations oncalibrate={() => (view = 'calibrate')} ontransfer={() => (view = 'stations')} />
+  <Stations oncalibrate={() => (view = 'calibrate')} ontransfer={() => (view = 'transfer')} />
 {:else if view === 'vehicle'}
   <Vehicle />
 {:else if view === 'calibrate'}
   <CalibrateWizard onclose={() => (view = 'stations')} />
+{:else if view === 'transfer'}
+  <TransferWizard onclose={() => (view = 'stations')} />
 {:else}
   <SensorDebug />
 {/if}
 
-{#if view !== 'calibrate'}
+{#if view !== 'calibrate' && view !== 'transfer'}
   <nav>
     {#each tabs as tab (tab.id)}
       <button class:active={view === tab.id} onclick={() => (view = tab.id)}>{tab.label}</button>
