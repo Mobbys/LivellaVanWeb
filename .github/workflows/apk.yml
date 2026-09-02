@@ -1,0 +1,44 @@
+name: APK Android
+
+# Opzionale: serve solo a chi vuole un file installabile invece della PWA.
+# La webview di Capacitor è Chrome, quindi i sensori e la precisione sono
+# gli stessi della versione web.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - run: npm ci
+
+      # Dentro l'APK i file sono serviti dalla radice, non da /LivellaVanWeb/.
+      - run: npm run build
+        env:
+          APP_BASE: /
+
+      - run: npx cap sync android
+
+      - name: Compila l'APK di debug
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: livella-camper-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

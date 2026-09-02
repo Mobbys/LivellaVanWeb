@@ -2,8 +2,14 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
 
+/**
+ * Su GitHub Pages il sito vive in una sottocartella; dentro l'APK i file sono
+ * serviti dalla radice, quindi il base va azzerato con APP_BASE=/.
+ */
+const base = process.env.APP_BASE ?? '/LivellaVanWeb/'
+
 export default defineConfig({
-  base: '/LivellaVanWeb/',
+  base,
   plugins: [
     svelte(),
     VitePWA({
@@ -14,6 +20,7 @@ export default defineConfig({
         description: 'Livella per camper: inclinazione e rialzo delle ruote in cm',
         lang: 'it',
         start_url: '.',
+        scope: base,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#0a0e12',

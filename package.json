@@ -13,6 +13,9 @@
     "typecheck": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
     "@types/node": "^24.13.3",

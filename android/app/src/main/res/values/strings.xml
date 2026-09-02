@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Livella camper</string>
+    <string name="title_activity_main">Livella camper</string>
+    <string name="package_name">it.mobbys.livellacamper</string>
+    <string name="custom_url_scheme">it.mobbys.livellacamper</string>
+</resources>

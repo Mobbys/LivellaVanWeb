@@ -28,10 +28,15 @@ Svelte.
 
 ## Stato
 
-Milestone completate: 1 (setup), 2 (matematica in `src/core/`), 3 (sensori +
-pagina di debug). Prossima: 4 (livella grezza con due bolle e calibrazione
-fittizia). `src/store/` non esiste ancora; in `src/ui/` c'è solo
-`SensorDebug.svelte`, che è la schermata montata da `App.svelte`.
+Tutte le milestone della specifica sono fatte, dalla 1 alla 9.
+
+Struttura:
+- `src/core/` — matematica pura, coperta al 100% dai test.
+- `src/sensors/` — sorgenti di orientamento e wake lock.
+- `src/store/` — stato reattivo, veicolo, postazioni, persistenza.
+- `src/ui/` — schermate; `format.ts` è l'unico posto dove metri e radianti
+  diventano centimetri e gradi.
+- `android/` — guscio Capacitor opzionale per l'APK (sezione 9.3).
 
 Convenzioni fissate in `src/core/`:
 - Matrici `Mat3` row-major, vettori `Vec3` come tuple readonly.
@@ -47,3 +52,13 @@ Convenzioni fissate in `src/sensors/`:
   `DeviceOrientationEvent`, e restituisce anche l'elenco dei tentativi falliti.
 - Una sorgente che non produce letture entro 3 s è un errore, non un successo
   silenzioso.
+
+Note su cose che non si vedono dal codice:
+- `AppState` ha tre campi in più rispetto alla specifica (`toleranceDeg`,
+  `nightMode`, `beep`), richiesti dalla UI ma non elencati nel modello dati.
+  La migrazione li completa sui salvataggi che non li hanno.
+- Il `base` di Vite è `/LivellaVanWeb/` per Pages e va azzerato con
+  `APP_BASE=/` per l'APK, altrimenti dentro il guscio nativo gli asset danno
+  404 e si vede una pagina bianca.
+- Nella tabella 3.6 della specifica il caso combinato riporta PD = 1,0 cm:
+  è un refuso, il valore giusto è 12,0 cm. Il test lo annota.
