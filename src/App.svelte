@@ -3,14 +3,16 @@
   import Level from './ui/Level.svelte'
   import SensorDebug from './ui/SensorDebug.svelte'
   import Stations from './ui/Stations.svelte'
+  import Vehicle from './ui/Vehicle.svelte'
 
-  type View = 'level' | 'stations' | 'calibrate' | 'debug'
+  type View = 'level' | 'stations' | 'vehicle' | 'calibrate' | 'debug'
 
   let view = $state<View>('level')
 
   const tabs: { id: View; label: string }[] = [
     { id: 'level', label: 'Livella' },
     { id: 'stations', label: 'Postazioni' },
+    { id: 'vehicle', label: 'Veicolo' },
     { id: 'debug', label: 'Debug' },
   ]
 </script>
@@ -19,6 +21,8 @@
   <Level oncalibrate={() => (view = 'calibrate')} />
 {:else if view === 'stations'}
   <Stations oncalibrate={() => (view = 'calibrate')} ontransfer={() => (view = 'stations')} />
+{:else if view === 'vehicle'}
+  <Vehicle />
 {:else if view === 'calibrate'}
   <CalibrateWizard onclose={() => (view = 'stations')} />
 {:else}

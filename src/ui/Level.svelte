@@ -1,19 +1,56 @@
 <script lang="ts">
-  import { attitude } from '../core/leveling'
+  import { attitude, axleLift, sideLift, wheelLifts, type Wheels } from '../core/leveling'
   import { matMulVec, radToDeg } from '../core/vec'
   import { app } from '../store/app.svelte'
   import { orientation } from '../store/orientation.svelte'
   import Bubble from './Bubble.svelte'
+  import WheelDiagram from './WheelDiagram.svelte'
+  import { formatDegrees, formatLift, liftValue, unitLabel } from './format'
 
   type Props = { oncalibrate: () => void }
   const { oncalibrate }: Props = $props()
 
   const matrix = $derived(app.activeMatrix)
   const upVehicle = $derived(matrix === null ? null : matMulVec(matrix, orientation.up))
-  const angles = $derived(upVehicle === null ? null : attitude(upVehicle))
-  const rollDeg = $derived(angles === null ? 0 : radToDeg(angles.roll))
-  const pitchDeg = $derived(angles === null ? 0 : radToDeg(angles.pitch))
+  const angles = $derived(upVehicle === null ? { roll: 0, pitch: 0 } : attitude(upVehicle))
   const live = $derived(orientation.running && matrix !== null)
+
+  const liftsMeters = $derived(
+    upVehicle === null
+      ? { frontLeft: 0, frontRight: 0, rearLeft: 0, rearRight: 0 }
+      : wheelLifts(upVehicle, app.vehicle),
+  )
+
+  const lifts = $derived<Wheels<number>>({
+    frontLeft: liftValue(liftsMeters.frontLeft, app.units),
+    frontRight: liftValue(liftsMeters.frontRight, app.units),
+    rearLeft: liftValue(liftsMeters.rearLeft, app.units),
+    rearRight: liftValue(liftsMeters.rearRight, app.units),
+  })
+
+  const levelled = $derived(
+    Math.abs(radToDeg(angles.roll)) <= app.toleranceDeg &&
+      Math.abs(radToDeg(angles.pitch)) <= app.toleranceDeg,
+  )
+
+  /**
+   * In piazzola si livella prima il trasversale, mettendo entrambe le ruote di
+   * un lato sullo stesso cuneo: il suggerimento segue lo stesso ordine.
+   */
+  const advice = $derived.by((): string => {
+    if (upVehicle === null || !live) return 'Attiva i sensori per misurare.'
+    if (levelled) return 'Il camper è in bolla.'
+
+    if (Math.abs(radToDeg(angles.roll)) > app.toleranceDeg) {
+      const { side, lift } = sideLift(upVehicle, app.vehicle)
+      const where = side === 'left' ? 'sinistro' : 'destro'
+      return `Alza il lato ${where} di ${formatLift(lift, app.units)}, poi rimisura.`
+    }
+
+    const { axle, lift } = axleLift(upVehicle, app.vehicle)
+    const where = axle === 'front' ? 'anteriore' : 'posteriore'
+    return `Alza l’asse ${where} di ${formatLift(lift, app.units)}, poi rimisura.`
+  })
 </script>
 
 <section>
@@ -61,20 +98,32 @@
 
     <div class="bubbles">
       <Bubble
-        angleDeg={rollDeg}
+        angleDeg={radToDeg(angles.roll)}
         axis="horizontal"
         label="Trasversale"
         toleranceDeg={app.toleranceDeg}
         {live}
       />
       <Bubble
-        angleDeg={pitchDeg}
+        angleDeg={radToDeg(angles.pitch)}
         axis="vertical"
         label="Longitudinale"
         toleranceDeg={app.toleranceDeg}
         {live}
       />
     </div>
+
+    <WheelDiagram {lifts} vehicle={app.vehicle} unit={unitLabel(app.units)} {live} />
+
+    <p class="advice" class:ok={levelled && live}>{advice}</p>
+
+    {#if live}
+      <p class="note">
+        Valori in {unitLabel(app.units)}. Dopo ogni cuneo la geometria cambia:
+        rimisura prima di considerarli buoni. Angoli: {formatDegrees(angles.roll)}
+        trasversale, {formatDegrees(angles.pitch)} longitudinale.
+      </p>
+    {/if}
 
     {#if !orientation.running}
       <button class="primary" onclick={() => orientation.start()}>
@@ -129,6 +178,16 @@
     gap: 1rem;
   }
 
+  .advice {
+    margin: 0;
+    font-size: var(--size-md);
+    line-height: 1.35;
+  }
+
+  .advice.ok {
+    color: var(--ok);
+  }
+
   .empty {
     display: flex;
     flex-direction: column;
@@ -138,6 +197,13 @@
   .empty p {
     margin: 0;
     color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .note {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--size-xs);
     line-height: 1.5;
   }
 

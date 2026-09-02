@@ -98,3 +98,14 @@ export function axleLift(
   if (lift === 0) return { axle: 'none', lift: 0 }
   return { axle: uy > 0 ? 'rear' : 'front', lift }
 }
+
+export const metersToCm = (meters: number): number => meters * 100
+
+/**
+ * Arrotondamento al passo di lettura: con i cunei sotto le ruote un decimo di
+ * millimetro non significa niente, e una cifra in più si legge peggio.
+ */
+export function roundToStep(value: number, step: number): number {
+  if (step <= 0) return value
+  return Math.round(value / step) * step
+}

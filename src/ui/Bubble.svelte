@@ -39,10 +39,14 @@
   const tickPosition = (deg: number): number => (deg / saturationDeg) * TRAVEL
 
   const color = $derived(level ? 'var(--ok)' : saturated ? 'var(--bad)' : 'var(--warn)')
+
+  const text = $derived(
+    angleDeg.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+  )
 </script>
 
 <figure>
-  <svg viewBox="0 0 100 100" role="img" aria-label="{label} {angleDeg.toFixed(1)} gradi">
+  <svg viewBox="0 0 100 100" role="img" aria-label="{label} {text} gradi">
     <circle cx="50" cy="50" r={R} fill="var(--surface)" stroke="var(--line)" stroke-width="2" />
 
     {#each ticks as tick (tick)}
@@ -93,7 +97,7 @@
 
   <figcaption>
     <span class="value" style:color={live ? color : 'var(--muted)'}>
-      {live ? `${angleDeg.toFixed(1)}°` : '—'}
+      {live ? `${text}°` : '—'}
     </span>
     <span class="label">{label}</span>
   </figcaption>

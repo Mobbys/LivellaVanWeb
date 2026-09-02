@@ -3,7 +3,9 @@ import { radToDeg } from '../src/core/vec'
 import {
   attitude,
   axleLift,
+  metersToCm,
   referenceWheel,
+  roundToStep,
   sideLift,
   wheelHeights,
   wheelLifts,
@@ -153,5 +155,38 @@ describe('rialzo per lato e per asse', () => {
   it('nessun lato e nessun asse da alzare quando il camper è in bolla', () => {
     expect(sideLift([0, 0, 1], van).side).toBe('none')
     expect(axleLift([0, 0, 1], van).axle).toBe('none')
+  })
+})
+
+describe('conversione al confine con la UI', () => {
+  it('converte i metri in centimetri', () => {
+    expect(metersToCm(0.1151392)).toBeCloseTo(11.51392, 9)
+    expect(metersToCm(0)).toBe(0)
+  })
+
+  it('arrotonda al mezzo centimetro', () => {
+    expect(roundToStep(11.51392, 0.5)).toBe(11.5)
+    expect(roundToStep(11.74, 0.5)).toBe(11.5)
+    expect(roundToStep(11.76, 0.5)).toBe(12)
+    expect(roundToStep(0.2, 0.5)).toBe(0)
+    expect(roundToStep(-11.6, 0.5)).toBe(-11.5)
+  })
+
+  it('arrotonda al mezzo millimetro con un passo diverso', () => {
+    expect(roundToStep(115.139, 5)).toBe(115)
+    expect(roundToStep(117.6, 5)).toBe(120)
+  })
+
+  it('un passo non positivo lascia il valore intatto', () => {
+    expect(roundToStep(11.51392, 0)).toBe(11.51392)
+    expect(roundToStep(11.51392, -1)).toBe(11.51392)
+  })
+
+  it('non produce mai più di una cifra decimale utile in cm', () => {
+    const lifts = wheelLifts([0.05, 0.03, 0.9982985], van)
+    for (const lift of Object.values(lifts)) {
+      const cm = roundToStep(metersToCm(lift), 0.5)
+      expect(Number.isInteger(cm * 2)).toBe(true)
+    }
   })
 })
