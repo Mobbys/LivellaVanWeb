@@ -1,6 +1,7 @@
-<script lang="ts"></script>
+<script lang="ts">
+  import SensorDebug from './ui/SensorDebug.svelte'
+</script>
 
 <main>
-  <h1>Livella camper</h1>
-  <p>In costruzione: matematica di livellamento (src/core/) completata e testata.</p>
+  <SensorDebug />
 </main>

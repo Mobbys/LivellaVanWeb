@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { angleBetween, degToRad, norm, radToDeg, type Vec3 } from '../src/core/vec'
-import { StabilityDetector, UpFilter, averageDirection } from '../src/core/filter'
+import { AngleDriftMonitor, StabilityDetector, UpFilter, averageDirection } from '../src/core/filter'
 
 function tilted(deg: number, azimuth = 0): Vec3 {
   const a = degToRad(deg)
@@ -175,5 +175,68 @@ describe('rilevatore di stabilità', () => {
       detector.push(tilted(i % 2 === 0 ? 0.02 : -0.02), t)
     }
     expect(radToDeg(angleBetween([0, 0, 1], detector.average()))).toBeLessThan(1e-9)
+  })
+})
+
+describe('deriva di un angolo circolare', () => {
+  const feed = (monitor: AngleDriftMonitor, rate: number, seconds: number, from = 0) => {
+    for (let t = 0; t < seconds - 1e-9; t += 0.02) {
+      monitor.push(((from + rate * t) % 360 + 360) % 360, t)
+    }
+  }
+
+  it('non si pronuncia finché la finestra non è piena', () => {
+    const monitor = new AngleDriftMonitor()
+    feed(monitor, 10, 0.3)
+    expect(monitor.ready).toBe(false)
+    expect(monitor.drifting).toBe(false)
+  })
+
+  it('un angolo immobile non deriva', () => {
+    const monitor = new AngleDriftMonitor()
+    feed(monitor, 0, 2, 137)
+    expect(monitor.drift).toBeCloseTo(0, 9)
+    expect(monitor.drifting).toBe(false)
+  })
+
+  it('misura la velocità di deriva in gradi al secondo', () => {
+    const monitor = new AngleDriftMonitor()
+    feed(monitor, 5, 2, 100)
+    expect(monitor.drift).toBeCloseTo(5, 6)
+    expect(monitor.drifting).toBe(true)
+  })
+
+  it('gestisce il passaggio da 359° a 0° senza inventare una deriva', () => {
+    const monitor = new AngleDriftMonitor()
+    feed(monitor, 2, 3, 355)
+    expect(monitor.drift).toBeCloseTo(2, 6)
+  })
+
+  it('una deriva sotto la soglia non degrada la qualità', () => {
+    const monitor = new AngleDriftMonitor({ thresholdDegPerSecond: 1 })
+    feed(monitor, 0.5, 2)
+    expect(monitor.drifting).toBe(false)
+  })
+
+  it('la deriva è indefinita con meno di due campioni', () => {
+    const monitor = new AngleDriftMonitor()
+    monitor.push(10, 0)
+    expect(monitor.drift).toBe(Infinity)
+  })
+
+  it('la deriva è indefinita se i campioni hanno lo stesso istante', () => {
+    const monitor = new AngleDriftMonitor()
+    monitor.push(10, 1)
+    monitor.push(12, 1)
+    expect(monitor.drift).toBe(Infinity)
+  })
+
+  it('reset svuota la finestra', () => {
+    const monitor = new AngleDriftMonitor()
+    feed(monitor, 20, 2)
+    expect(monitor.drifting).toBe(true)
+    monitor.reset()
+    expect(monitor.ready).toBe(false)
+    expect(monitor.drifting).toBe(false)
   })
 })

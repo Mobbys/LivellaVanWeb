@@ -8,6 +8,12 @@ import { add, angleBetween, degToRad, normalize, scale, sub, type Vec3 } from '.
 export const DEFAULT_TIME_CONSTANT = 0.8
 export const DEFAULT_STABILITY_WINDOW = 1
 export const DEFAULT_STABILITY_THRESHOLD_DEG = 0.05
+export const DEFAULT_DRIFT_WINDOW = 2
+/**
+ * Sopra questa deriva l'azimut del telefono non è affidabile come riferimento
+ * assoluto: il trasferimento fra postazioni va disabilitato.
+ */
+export const DEFAULT_DRIFT_THRESHOLD_DEG_PER_S = 1
 /** Durata della media che precede il salvataggio di una calibrazione. */
 export const CALIBRATION_AVERAGE_SECONDS = 2
 
@@ -104,5 +110,69 @@ export class StabilityDetector {
   /** Media della finestra corrente, da usare come lettura di calibrazione. */
   average(): Vec3 {
     return averageDirection(this.samples.map((s) => s.up))
+  }
+}
+
+type DriftOptions = {
+  /** Ampiezza della finestra di osservazione, in secondi. */
+  window?: number
+  /** Deriva oltre la quale l'angolo non è più un riferimento affidabile. */
+  thresholdDegPerSecond?: number
+}
+
+/**
+ * Deriva di un angolo circolare (l'alpha del DeviceOrientationEvent) su una
+ * finestra scorrevole. I campioni arrivano in [0, 360): vengono srotolati
+ * prendendo ogni volta la differenza più breve, altrimenti il passaggio da
+ * 359° a 0° sembrerebbe un salto di 359°.
+ */
+export class AngleDriftMonitor {
+  private readonly window: number
+  private readonly threshold: number
+  private samples: { angle: number; time: number }[] = []
+  private unwrapped = 0
+
+  constructor(options: DriftOptions = {}) {
+    this.window = options.window ?? DEFAULT_DRIFT_WINDOW
+    this.threshold = options.thresholdDegPerSecond ?? DEFAULT_DRIFT_THRESHOLD_DEG_PER_S
+  }
+
+  reset(): void {
+    this.samples = []
+    this.unwrapped = 0
+  }
+
+  push(angleDeg: number, time: number): void {
+    if (this.samples.length === 0) {
+      this.unwrapped = angleDeg
+    } else {
+      const previous = this.samples[this.samples.length - 1].angle
+      const step = (((angleDeg - (((previous % 360) + 360) % 360) + 540) % 360) + 360) % 360
+      this.unwrapped = previous + step - 180
+    }
+    this.samples.push({ angle: this.unwrapped, time })
+
+    const cutoff = time - this.window
+    while (this.samples.length > 0 && this.samples[0].time < cutoff) this.samples.shift()
+  }
+
+  get ready(): boolean {
+    if (this.samples.length < 2) return false
+    const span = this.samples[this.samples.length - 1].time - this.samples[0].time
+    return span >= this.window * 0.9
+  }
+
+  /** Velocità di deriva in gradi al secondo. */
+  get drift(): number {
+    if (this.samples.length < 2) return Infinity
+    const first = this.samples[0]
+    const last = this.samples[this.samples.length - 1]
+    const span = last.time - first.time
+    if (span <= 0) return Infinity
+    return Math.abs(last.angle - first.angle) / span
+  }
+
+  get drifting(): boolean {
+    return this.ready && this.drift > this.threshold
   }
 }
