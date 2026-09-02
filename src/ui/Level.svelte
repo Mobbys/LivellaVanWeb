@@ -5,6 +5,7 @@
   import { orientation } from '../store/orientation.svelte'
   import Bubble from './Bubble.svelte'
   import WheelDiagram from './WheelDiagram.svelte'
+  import { LevelBeeper } from './beep'
   import { formatDegrees, formatLift, liftValue, unitLabel } from './format'
 
   type Props = { oncalibrate: () => void }
@@ -26,6 +27,23 @@
     frontRight: liftValue(liftsMeters.frontRight, app.units),
     rearLeft: liftValue(liftsMeters.rearLeft, app.units),
     rearRight: liftValue(liftsMeters.rearRight, app.units),
+  })
+
+  const worstDeg = $derived(
+    Math.max(Math.abs(radToDeg(angles.roll)), Math.abs(radToDeg(angles.pitch))),
+  )
+
+  const beeper = new LevelBeeper()
+
+  // Il beep serve a chi è fuori con i cunei: acceso solo mentre si misura.
+  $effect(() => {
+    if (app.beep && live) void beeper.start()
+    else beeper.stop()
+    return () => beeper.stop()
+  })
+
+  $effect(() => {
+    beeper.update(worstDeg, app.toleranceDeg)
   })
 
   const levelled = $derived(
