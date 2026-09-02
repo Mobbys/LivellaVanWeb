@@ -37,7 +37,7 @@
 </script>
 
 <section>
-  <h1>Impostazioni</h1>
+  <h1>Opzioni</h1>
 
   <div class="row">
     <span>Unità</span>

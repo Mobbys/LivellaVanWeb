@@ -18,7 +18,7 @@
     { id: 'level', label: 'Livella' },
     { id: 'stations', label: 'Postazioni' },
     { id: 'vehicle', label: 'Veicolo' },
-    { id: 'settings', label: 'Impostazioni' },
+    { id: 'settings', label: 'Opzioni' },
     { id: 'debug', label: 'Debug' },
   ]
 
