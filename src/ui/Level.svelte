@@ -1,15 +1,19 @@
 <script lang="ts">
   import { attitude } from '../core/leveling'
   import { matMulVec, radToDeg } from '../core/vec'
-  import { IDENTITY_STATION, orientation } from '../store/orientation.svelte'
+  import { app } from '../store/app.svelte'
+  import { orientation } from '../store/orientation.svelte'
   import Bubble from './Bubble.svelte'
 
-  // Postazione fittizia: finché la calibrazione non esiste, il telefono è
-  // considerato già allineato al telaio.
-  const upVehicle = $derived(matMulVec(IDENTITY_STATION, orientation.up))
-  const angles = $derived(attitude(upVehicle))
-  const rollDeg = $derived(radToDeg(angles.roll))
-  const pitchDeg = $derived(radToDeg(angles.pitch))
+  type Props = { oncalibrate: () => void }
+  const { oncalibrate }: Props = $props()
+
+  const matrix = $derived(app.activeMatrix)
+  const upVehicle = $derived(matrix === null ? null : matMulVec(matrix, orientation.up))
+  const angles = $derived(upVehicle === null ? null : attitude(upVehicle))
+  const rollDeg = $derived(angles === null ? 0 : radToDeg(angles.roll))
+  const pitchDeg = $derived(angles === null ? 0 : radToDeg(angles.pitch))
+  const live = $derived(orientation.running && matrix !== null)
 </script>
 
 <section>
@@ -33,31 +37,51 @@
     <p class="warn">{orientation.error}</p>
   {/if}
 
-  <div class="bubbles">
-    <Bubble
-      angleDeg={rollDeg}
-      axis="horizontal"
-      label="Trasversale"
-      live={orientation.running}
-    />
-    <Bubble
-      angleDeg={pitchDeg}
-      axis="vertical"
-      label="Longitudinale"
-      live={orientation.running}
-    />
-  </div>
+  {#if app.stations.length === 0}
+    <!-- Niente bolle finte: senza calibrazione non c'è nulla da mostrare. -->
+    <div class="empty">
+      <p>
+        Nessuna postazione calibrata. Appoggia il telefono dove lo terrai e
+        insegnagli, una volta sola, come è messo rispetto al telaio.
+      </p>
+      <button class="primary" onclick={oncalibrate}>Calibra la prima postazione</button>
+    </div>
+  {:else}
+    <label class="selector">
+      <span>Postazione</span>
+      <select
+        value={app.activeStation?.id ?? ''}
+        onchange={(event) => app.setActiveStation(event.currentTarget.value)}
+      >
+        {#each app.stations as station (station.id)}
+          <option value={station.id}>{station.name}</option>
+        {/each}
+      </select>
+    </label>
 
-  {#if !orientation.running}
-    <button class="primary" onclick={() => orientation.start()}>
-      {orientation.status === 'starting' ? 'Attivazione…' : 'Attiva sensori'}
-    </button>
+    <div class="bubbles">
+      <Bubble
+        angleDeg={rollDeg}
+        axis="horizontal"
+        label="Trasversale"
+        toleranceDeg={app.toleranceDeg}
+        {live}
+      />
+      <Bubble
+        angleDeg={pitchDeg}
+        axis="vertical"
+        label="Longitudinale"
+        toleranceDeg={app.toleranceDeg}
+        {live}
+      />
+    </div>
+
+    {#if !orientation.running}
+      <button class="primary" onclick={() => orientation.start()}>
+        {orientation.status === 'starting' ? 'Attivazione…' : 'Attiva sensori'}
+      </button>
+    {/if}
   {/if}
-
-  <p class="note">
-    Postazione fittizia: la lettura è quella grezza del telefono, non ancora
-    riferita al telaio. La calibrazione arriva con le postazioni.
-  </p>
 </section>
 
 <style>
@@ -67,7 +91,7 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
   }
 
   header {
@@ -86,20 +110,39 @@
     color: var(--ok);
   }
 
+  .selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .selector span {
+    color: var(--muted);
+    font-size: var(--size-xs);
+    flex: none;
+  }
+
   .bubbles {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
 
-  .warn {
-    color: var(--warn);
-    margin: 0;
+  .empty {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .note {
+  .empty p {
+    margin: 0;
     color: var(--muted);
-    font-size: var(--size-xs);
+    line-height: 1.5;
+  }
+
+  .warn {
+    color: var(--warn);
     margin: 0;
   }
 </style>

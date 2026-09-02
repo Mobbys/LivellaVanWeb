@@ -1,29 +1,50 @@
 <script lang="ts">
+  import CalibrateWizard from './ui/CalibrateWizard.svelte'
   import Level from './ui/Level.svelte'
   import SensorDebug from './ui/SensorDebug.svelte'
+  import Stations from './ui/Stations.svelte'
 
-  type View = 'level' | 'debug'
+  type View = 'level' | 'stations' | 'calibrate' | 'debug'
 
   let view = $state<View>('level')
+
+  const tabs: { id: View; label: string }[] = [
+    { id: 'level', label: 'Livella' },
+    { id: 'stations', label: 'Postazioni' },
+    { id: 'debug', label: 'Debug' },
+  ]
 </script>
 
 {#if view === 'level'}
-  <Level />
+  <Level oncalibrate={() => (view = 'calibrate')} />
+{:else if view === 'stations'}
+  <Stations oncalibrate={() => (view = 'calibrate')} ontransfer={() => (view = 'stations')} />
+{:else if view === 'calibrate'}
+  <CalibrateWizard onclose={() => (view = 'stations')} />
 {:else}
   <SensorDebug />
 {/if}
 
-<nav>
-  <button class:active={view === 'level'} onclick={() => (view = 'level')}>Livella</button>
-  <button class:active={view === 'debug'} onclick={() => (view = 'debug')}>Debug</button>
-</nav>
+{#if view !== 'calibrate'}
+  <nav>
+    {#each tabs as tab (tab.id)}
+      <button class:active={view === tab.id} onclick={() => (view = tab.id)}>{tab.label}</button>
+    {/each}
+  </nav>
+{/if}
 
 <style>
   nav {
     display: flex;
     gap: 0.5rem;
     justify-content: center;
-    padding: 0 1rem 1.25rem;
+    padding: 0.5rem 1rem 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  nav button {
+    font-size: var(--size-xs);
+    padding: 0.5rem 0.875rem;
   }
 
   .active {
