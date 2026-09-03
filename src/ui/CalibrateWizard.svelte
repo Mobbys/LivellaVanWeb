@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
   import { CalibrationError, calibrateStation, type NoseDirection } from '../core/calibration'
   import { DEFAULT_STABILITY_THRESHOLD_DEG, averageDirection } from '../core/filter'
   import type { Mat3, Vec3 } from '../core/vec'
@@ -101,6 +102,10 @@
     cancelAnimationFrame(frame)
     step = 'nose'
   }
+
+  // Uscendo dal wizard a misura in corso il ciclo continuerebbe a girare a
+  // vuoto, consumando batteria per niente.
+  onDestroy(() => cancelAnimationFrame(frame))
 
   function saveStation(): void {
     if (matrix === null) return

@@ -3,6 +3,7 @@
    * Trasferimento fra postazioni: M_new = M_old · R₀ᵀ · R₁.
    * Il camper deve restare fermo, ma non serve che sia in bolla.
    */
+  import { onDestroy } from 'svelte'
   import {
     TRANSFER_TIMEOUT_MS,
     matrixDifferenceAngle,
@@ -112,6 +113,17 @@
     verifying = false
     step = 'result'
   }
+
+  /**
+   * Il pulsante Annulla in testata smonta il componente senza passare da
+   * abort(): senza questo resterebbero accesi il timer, l'ascoltatore di
+   * visibilità e soprattutto il wake lock, che tiene lo schermo acceso.
+   */
+  onDestroy(() => {
+    clearInterval(timer)
+    document.removeEventListener('visibilitychange', onHidden)
+    void wakeLock.release()
+  })
 
   function save(): void {
     if (result === null || source === null) return

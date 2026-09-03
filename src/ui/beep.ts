@@ -33,19 +33,30 @@ export class LevelBeeper {
   private angleDeg = 90
   private toleranceDeg = 1
   private running = false
+  /** Cambia a ogni start/stop: una ripresa tardiva capisce di essere vecchia. */
+  private session = 0
 
   /** Da chiamare dentro un gesto dell'utente: l'audio non parte da solo. */
   async start(): Promise<boolean> {
+    if (this.running) return true
     const Ctor = contextCtor()
     if (Ctor === undefined) return false
+
+    // running si alza subito, prima dell'attesa: due chiamate ravvicinate non
+    // devono avviare due cicli paralleli che battono fuori tempo.
+    this.running = true
+    const session = ++this.session
     this.context ??= new Ctor()
     await this.context.resume().catch(() => undefined)
-    this.running = true
+    if (session !== this.session) return false
+
+    clearTimeout(this.timer)
     this.schedule()
     return true
   }
 
   stop(): void {
+    this.session += 1
     this.running = false
     clearTimeout(this.timer)
     this.stopSteady()
@@ -87,6 +98,12 @@ export class LevelBeeper {
     gain.gain.exponentialRampToValueAtTime(0.2, context.currentTime + 0.01)
     gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + BURST_MS / 1000)
     oscillator.connect(gain).connect(context.destination)
+    // Senza scollegarli, i nodi spenti restano appesi al grafo audio fino alla
+    // garbage collection: a dieci beep al secondo se ne accumulano parecchi.
+    oscillator.onended = () => {
+      oscillator.disconnect()
+      gain.disconnect()
+    }
     oscillator.start()
     oscillator.stop(context.currentTime + BURST_MS / 1000 + 0.02)
   }
