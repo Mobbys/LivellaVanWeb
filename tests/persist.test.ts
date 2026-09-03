@@ -87,6 +87,22 @@ describe('migrazione dello stato salvato', () => {
     expect(migrate({ toleranceDeg: 'due' }).toleranceDeg).toBe(1)
   })
 
+  it('la soglia del tono continuo ha limiti suoi', () => {
+    expect(migrate({ beepToleranceDeg: 0 }).beepToleranceDeg).toBe(0.1)
+    expect(migrate({ beepToleranceDeg: 90 }).beepToleranceDeg).toBe(5)
+  })
+
+  it('senza soglia del beep si eredita quella della bolla, com’era prima', () => {
+    expect(migrate({ toleranceDeg: 2.5 }).beepToleranceDeg).toBe(2.5)
+    expect(migrate({}).beepToleranceDeg).toBe(1)
+  })
+
+  it('le due soglie restano indipendenti quando ci sono entrambe', () => {
+    const state = migrate({ toleranceDeg: 1, beepToleranceDeg: 2.4 })
+    expect(state.toleranceDeg).toBe(1)
+    expect(state.beepToleranceDeg).toBe(2.4)
+  })
+
   it('conserva la qualità dichiarata della postazione', () => {
     const state = withStation()
     state.stations[0].quality = 'transferred'

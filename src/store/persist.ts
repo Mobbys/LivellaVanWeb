@@ -39,6 +39,8 @@ export type AppState = {
   units: Units
   /** Sotto questo angolo la bolla è verde. */
   toleranceDeg: number
+  /** Sotto questo angolo il beep diventa un tono continuo. */
+  beepToleranceDeg: number
   theme: ThemeId
   beep: boolean
 }
@@ -54,9 +56,12 @@ export const defaultState = (): AppState => ({
   activeStationId: null,
   units: 'cm',
   toleranceDeg: DEFAULT_TOLERANCE_DEG,
+  beepToleranceDeg: DEFAULT_TOLERANCE_DEG,
   theme: DEFAULT_THEME,
   beep: false,
 })
+
+export const clampTolerance = (deg: number): number => Math.min(5, Math.max(0.1, deg))
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
@@ -111,6 +116,9 @@ export function migrate(raw: unknown): AppState {
       : (stations[0]?.id ?? null)
 
   const tolerance = finiteOr(raw.toleranceDeg, DEFAULT_TOLERANCE_DEG)
+  // Chi aggiorna da una versione senza questa voce si ritrova il beep come
+  // l'ha sempre sentito: agganciato alla tolleranza della bolla.
+  const beepTolerance = finiteOr(raw.beepToleranceDeg, tolerance)
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -118,7 +126,8 @@ export function migrate(raw: unknown): AppState {
     stations,
     activeStationId,
     units: raw.units === 'mm' ? 'mm' : 'cm',
-    toleranceDeg: Math.min(5, Math.max(0.1, tolerance)),
+    toleranceDeg: clampTolerance(tolerance),
+    beepToleranceDeg: clampTolerance(beepTolerance),
     theme: sanitizeTheme(raw),
     beep: raw.beep === true,
   }

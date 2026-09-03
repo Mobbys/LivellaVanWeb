@@ -99,7 +99,7 @@
       Beep
       <small>
         {isAudioSupported()
-          ? 'Accelera avvicinandosi allo zero, continuo quando sei in bolla.'
+          ? 'Accelera avvicinandosi allo zero, poi diventa un tono continuo.'
           : 'Questo browser non espone l’audio.'}
       </small>
     </span>
@@ -111,6 +111,27 @@
       {app.beep ? 'Attivo' : 'Spento'}
     </button>
   </div>
+
+  {#if app.beep}
+    <div class="field">
+      <label for="beep-tolerance">
+        Tono continuo sotto {app.beepToleranceDeg.toLocaleString('it-IT')}°
+      </label>
+      <input
+        id="beep-tolerance"
+        type="range"
+        min="0.2"
+        max="3"
+        step="0.1"
+        value={app.beepToleranceDeg}
+        oninput={(event) => app.setBeepTolerance(Number(event.currentTarget.value))}
+      />
+      <small>
+        È indipendente dalla tolleranza della bolla: puoi farti dire dall’orecchio
+        che sei arrivato prima o dopo di quanto lo dica il verde.
+      </small>
+    </div>
+  {/if}
 
   <h2>Backup</h2>
   <p class="note">

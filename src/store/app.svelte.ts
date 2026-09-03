@@ -3,6 +3,7 @@
 import { applyCorrection, calibrationCorrection } from '../core/calibration'
 import type { Mat3 } from '../core/vec'
 import {
+  clampTolerance,
   defaultState,
   load,
   save,
@@ -51,6 +52,10 @@ class AppStore {
 
   get toleranceDeg(): number {
     return this.data.toleranceDeg
+  }
+
+  get beepToleranceDeg(): number {
+    return this.data.beepToleranceDeg
   }
 
   get theme(): ThemeId {
@@ -145,7 +150,12 @@ class AppStore {
   }
 
   setTolerance(deg: number): void {
-    this.data.toleranceDeg = Math.min(5, Math.max(0.1, deg))
+    this.data.toleranceDeg = clampTolerance(deg)
+    this.persist()
+  }
+
+  setBeepTolerance(deg: number): void {
+    this.data.beepToleranceDeg = clampTolerance(deg)
     this.persist()
   }
 

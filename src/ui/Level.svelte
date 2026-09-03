@@ -50,7 +50,9 @@
   })
 
   $effect(() => {
-    beeper.update(worstDeg, app.toleranceDeg)
+    // Il beep ha una soglia sua: si può volerlo continuo prima o dopo che la
+    // bolla diventi verde.
+    beeper.update(worstDeg, app.beepToleranceDeg)
   })
 
   const levelled = $derived(
