@@ -5,8 +5,17 @@
   import { app } from '../store/app.svelte'
   import { orientation } from '../store/orientation.svelte'
 
-  type Props = { onclose: () => void }
-  const { onclose }: Props = $props()
+  type Props = {
+    onclose: () => void
+    /** Se valorizzato, la misura sostituisce quella postazione invece di crearne una. */
+    stationId?: string | null
+  }
+  const { onclose, stationId = null }: Props = $props()
+
+  const target = $derived(
+    stationId === null ? null : app.stations.find((s) => s.id === stationId) ?? null,
+  )
+  let updated = $state(0)
 
   type Step = 'level' | 'nose' | 'measure' | 'name'
 
@@ -95,6 +104,11 @@
 
   function saveStation(): void {
     if (matrix === null) return
+    if (target !== null) {
+      updated = app.recalibrateStation(target.id, matrix)
+      if (updated === 0) onclose()
+      return
+    }
     app.addStation(name, matrix, 'measured', null)
     onclose()
   }
@@ -102,7 +116,7 @@
 
 <section>
   <header>
-    <h1>Calibrazione</h1>
+    <h1>{target === null ? 'Calibrazione' : `Rifai «${target.name}»`}</h1>
     <button onclick={onclose}>Annulla</button>
   </header>
 
@@ -116,6 +130,12 @@
       automatici. Questa misura vale per sempre: se il camper non è davvero in
       piano adesso, ogni misura futura sarà sbagliata della stessa quantità.
     </p>
+    {#if target !== null}
+      <p class="note">
+        La misura sostituisce quella di «{target.name}»: nome e cronologia
+        restano, quella vecchia viene buttata.
+      </p>
+    {/if}
     <button class="primary" onclick={() => (step = 'nose')}>Il camper è in bolla</button>
   {:else if step === 'nose'}
     <p>
@@ -161,6 +181,18 @@
     {/if}
 
     <button onclick={cancelMeasure}>Interrompi</button>
+  {:else if target !== null}
+    {#if updated > 0}
+      <p class="ok">
+        «{target.name}» è stata rifatta. {updated === 1
+          ? 'Una postazione era stata trasferita da questa ed è stata corretta con lo stesso scarto.'
+          : `${updated} postazioni erano state trasferite da questa e sono state corrette con lo stesso scarto.`}
+      </p>
+      <button class="primary" onclick={onclose}>Ho capito</button>
+    {:else}
+      <p>Misura acquisita. Sostituisce la calibrazione di «{target.name}».</p>
+      <button class="primary" onclick={saveStation}>Sostituisci la calibrazione</button>
+    {/if}
   {:else}
     <p>Misura acquisita. Dai un nome a questa postazione.</p>
     <label for="station-name">Nome</label>
@@ -217,5 +249,9 @@
 
   .warn {
     color: var(--warn);
+  }
+
+  .ok {
+    color: var(--ok);
   }
 </style>

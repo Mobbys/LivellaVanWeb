@@ -13,6 +13,8 @@
   type View = 'level' | 'stations' | 'vehicle' | 'settings' | 'calibrate' | 'transfer' | 'debug'
 
   let view = $state<View>('level')
+  /** Postazione da rifare: se è null la calibrazione ne crea una nuova. */
+  let recalibrating = $state<string | null>(null)
 
   const tabs: { id: View; label: string }[] = [
     { id: 'level', label: 'Livella' },
@@ -35,15 +37,22 @@
 </script>
 
 {#if view === 'level'}
-  <Level oncalibrate={() => (view = 'calibrate')} onvehicle={() => (view = 'vehicle')} />
+  <Level
+    oncalibrate={() => ((recalibrating = null), (view = 'calibrate'))}
+    onvehicle={() => (view = 'vehicle')}
+  />
 {:else if view === 'stations'}
-  <Stations oncalibrate={() => (view = 'calibrate')} ontransfer={() => (view = 'transfer')} />
+  <Stations
+    oncalibrate={() => ((recalibrating = null), (view = 'calibrate'))}
+    ontransfer={() => (view = 'transfer')}
+    onrecalibrate={(id) => ((recalibrating = id), (view = 'calibrate'))}
+  />
 {:else if view === 'vehicle'}
-  <Vehicle oncalibrate={() => (view = 'calibrate')} />
+  <Vehicle oncalibrate={() => ((recalibrating = null), (view = 'calibrate'))} />
 {:else if view === 'settings'}
   <Settings ondebug={() => (view = 'debug')} />
 {:else if view === 'calibrate'}
-  <CalibrateWizard onclose={() => (view = 'stations')} />
+  <CalibrateWizard stationId={recalibrating} onclose={() => (view = 'stations')} />
 {:else if view === 'transfer'}
   <TransferWizard onclose={() => (view = 'stations')} />
 {:else}

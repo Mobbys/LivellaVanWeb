@@ -1,5 +1,6 @@
 /** Stato dell'applicazione: veicolo, postazioni, preferenze. Persistito a ogni modifica. */
 
+import { applyCorrection, calibrationCorrection } from '../core/calibration'
 import type { Mat3 } from '../core/vec'
 import {
   defaultState,
@@ -71,6 +72,49 @@ class AppStore {
     this.data.activeStationId = station.id
     this.persist()
     return station
+  }
+
+  /**
+   * Rifà la calibrazione di una postazione esistente, tenendone identità e
+   * nome. Le postazioni trasferite da questa vengono corrette con la stessa
+   * rotazione: erano state ricavate dalla matrice vecchia, e senza correggerle
+   * resterebbero indietro senza dirlo. Restituisce quante ne ha aggiornate.
+   */
+  recalibrateStation(id: string, matrix: Mat3): number {
+    const target = findStation(this.data.stations, id)
+    if (target === null) return 0
+
+    const correction = calibrationCorrection(stationMatrix(target), matrix)
+    const descendants = this.descendantsOf(id)
+
+    this.data.stations = this.data.stations.map((station) => {
+      if (station.id === id) {
+        // Rimisurata in bolla: non discende più da nessuno.
+        return { ...station, matrix: [...matrix], quality: 'measured', derivedFrom: null }
+      }
+      if (!descendants.has(station.id)) return station
+      return { ...station, matrix: [...applyCorrection(correction, stationMatrix(station))] }
+    })
+
+    this.persist()
+    return descendants.size
+  }
+
+  /** Postazioni trasferite da questa, anche indirettamente. */
+  private descendantsOf(id: string): Set<string> {
+    const found = new Set<string>()
+    let grew = true
+    while (grew) {
+      grew = false
+      for (const station of this.data.stations) {
+        if (station.derivedFrom === null || found.has(station.id)) continue
+        if (station.derivedFrom === id || found.has(station.derivedFrom)) {
+          found.add(station.id)
+          grew = true
+        }
+      }
+    }
+    return found
   }
 
   renameStation(id: string, name: string): void {

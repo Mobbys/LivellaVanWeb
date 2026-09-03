@@ -2,8 +2,12 @@
   import { app } from '../store/app.svelte'
   import { orientation } from '../store/orientation.svelte'
 
-  type Props = { oncalibrate: () => void; ontransfer: () => void }
-  const { oncalibrate, ontransfer }: Props = $props()
+  type Props = {
+    oncalibrate: () => void
+    ontransfer: () => void
+    onrecalibrate: (id: string) => void
+  }
+  const { oncalibrate, ontransfer, onrecalibrate }: Props = $props()
 
   let renamingId = $state<string | null>(null)
   let draftName = $state('')
@@ -64,6 +68,7 @@
             </span>
           </label>
           <div class="actions">
+            <button onclick={() => onrecalibrate(station.id)}>Rifai in bolla</button>
             <button onclick={() => startRename(station.id, station.name)}>Rinomina</button>
             <button class="danger" onclick={() => app.removeStation(station.id)}>Elimina</button>
           </div>

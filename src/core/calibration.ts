@@ -95,3 +95,18 @@ export function matrixDifferenceAngle(a: Mat3, b: Mat3): number {
 /** Due trasferimenti ripetuti concordano abbastanza da fidarsi del risultato. */
 export const transferAgrees = (a: Mat3, b: Mat3): boolean =>
   matrixDifferenceAngle(a, b) <= TRANSFER_AGREEMENT_LIMIT
+
+/**
+ * Correzione che porta una vecchia calibrazione sulla nuova: C = M_new · M_oldᵀ.
+ * Serve a rifare una postazione senza perdere quelle che ne discendono.
+ */
+export const calibrationCorrection = (mOld: Mat3, mNew: Mat3): Mat3 =>
+  orthonormalizeRows(matMul(mNew, transpose(mOld)))
+
+/**
+ * Applica la correzione a una postazione. Su una postazione trasferita
+ * M = M_origine · T, dove T è il fatto fisico dei due appoggi: moltiplicando a
+ * sinistra, T resta intatto e la discendente segue l'origine corretta.
+ */
+export const applyCorrection = (correction: Mat3, m: Mat3): Mat3 =>
+  orthonormalizeRows(matMul(correction, m))

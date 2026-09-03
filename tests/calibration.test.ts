@@ -26,7 +26,9 @@ import {
 import {
   CalibrationError,
   TRANSFER_TIMEOUT_MS,
+  applyCorrection,
   calibrateStation,
+  calibrationCorrection,
   matrixDifferenceAngle,
   transferAgrees,
   transferStation,
@@ -325,5 +327,51 @@ describe('orientation', () => {
     const a = upFromDeviceOrientation(0, 12, -7)
     const b = upFromDeviceOrientation(137, 12, -7)
     for (let k = 0; k < 3; k++) expect(a[k]).toBeCloseTo(b[k], 12)
+  })
+})
+
+describe('ricalibrazione di una postazione già salvata', () => {
+  const rnd = makeRandom(314)
+
+  it('la correzione porta la vecchia matrice sulla nuova', () => {
+    const vecchia = calibrateStation([0.02, 0.01, 0.9997], 'top')
+    const nuova = calibrateStation([0, 0, 1], 'top')
+    const correzione = calibrationCorrection(vecchia, nuova)
+    expectMatrixCloseTo(applyCorrection(correzione, vecchia), nuova, 11)
+  })
+
+  it('ricalibrare con la stessa lettura non muove niente', () => {
+    const m = calibrateStation([0.02, 0.01, 0.9997], 'left')
+    expectMatrixCloseTo(applyCorrection(calibrationCorrection(m, m), m), m, 11)
+  })
+
+  it('una postazione trasferita conserva il legame con quella di origine', () => {
+    // B è stata trasferita da A: B = A · T, con T fatto fisico dei due appoggi.
+    const vecchiaA = calibrateStation([0.03, -0.02, 0.9993], 'top')
+    const r0 = randomRotation(rnd)
+    const r1 = randomRotation(rnd)
+    const vecchiaB = transferStation(vecchiaA, r0, r1)
+
+    // A viene rifatta meglio: B deve seguirla, non restare indietro.
+    const nuovaA = calibrateStation([0, 0, 1], 'top')
+    const nuovaB = applyCorrection(calibrationCorrection(vecchiaA, nuovaA), vecchiaB)
+
+    expectMatrixCloseTo(nuovaB, transferStation(nuovaA, r0, r1), 11)
+    expect(isOrthonormal(nuovaB, 1e-12)).toBe(true)
+  })
+
+  it('la correzione resta ortonormale dopo cento ricalibrazioni', () => {
+    let m = calibrateStation([0, 0, 1], 'top')
+    for (let i = 0; i < 100; i++) {
+      let nuova: Mat3
+      try {
+        nuova = calibrateStation(upFromMatrix(randomRotation(rnd)), 'top')
+      } catch (error) {
+        expect(error).toBeInstanceOf(CalibrationError)
+        continue
+      }
+      m = applyCorrection(calibrationCorrection(m, nuova), m)
+    }
+    expect(isOrthonormal(m, 1e-12)).toBe(true)
   })
 })
