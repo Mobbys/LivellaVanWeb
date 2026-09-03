@@ -10,7 +10,7 @@
   import { matMulVec, radToDeg } from '../core/vec'
   import { app } from '../store/app.svelte'
   import { orientation } from '../store/orientation.svelte'
-  import Bubble from './Bubble.svelte'
+  import TiltView from './TiltView.svelte'
   import WheelDiagram from './WheelDiagram.svelte'
   import { LevelBeeper } from './beep'
   import { formatDegrees, formatLift, liftValue, unitLabel } from './format'
@@ -140,17 +140,17 @@
     </label>
 
     <div class="bubbles">
-      <Bubble
+      <TiltView
         angleDeg={radToDeg(angles.roll)}
-        axis="horizontal"
-        label="Trasversale"
+        view="rear"
+        label="Trasversale, da dietro"
         toleranceDeg={app.toleranceDeg}
         {live}
       />
-      <Bubble
+      <TiltView
         angleDeg={radToDeg(angles.pitch)}
-        axis="vertical"
-        label="Longitudinale"
+        view="side"
+        label="Longitudinale, di lato"
         toleranceDeg={app.toleranceDeg}
         {live}
       />
