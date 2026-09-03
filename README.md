@@ -179,6 +179,12 @@ Target ±0,3° dopo il filtraggio, che su 2,2 m di carreggiata sono circa ±1,2 
 I valori sono arrotondati a mezzo centimetro: sotto quella soglia, con dei cunei
 sotto le ruote, il numero non significa più niente.
 
+**È un ausilio, non uno strumento certificato.** Misura quello che i sensori del
+telefono le dicono, e la sua precisione dipende da come è calibrata e da dove
+appoggi il telefono. La prima messa in bolla va fatta con una livella vera — la
+procedura te lo impone — e se un risultato ti sembra strano, fidati della livella
+e non dello schermo.
+
 ---
 
 ## Per chi guarda il codice
@@ -220,3 +226,11 @@ sensibilità alla posa del telefono è verificata numericamente.
 Ogni push su `main` ripubblica su GitHub Pages. Il `base` di Vite è
 `/LivellaVanWeb/`; per l'APK va azzerato con `APP_BASE=/`, altrimenti dentro il
 guscio nativo gli asset danno 404.
+
+## Licenza
+
+[MIT](LICENSE). Fanne quello che vuoi — usala, modificala, ridistribuiscila,
+anche in un prodotto commerciale — conservando la nota di copyright.
+
+Il software è fornito così com'è, senza garanzie: vale la pena rileggere il
+paragrafo sulla precisione qui sopra prima di fidarsi di un numero.
