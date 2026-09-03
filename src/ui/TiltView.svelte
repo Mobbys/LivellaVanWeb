@@ -72,12 +72,19 @@
 
     <g transform="rotate({-drawn} 60 62)">
       {#if view === 'rear'}
-        <!-- Camper visto da dietro: sinistra e destra come nello schema ruote. -->
+        <!--
+          Camper visto da dietro: sinistra e destra come nello schema ruote.
+          Le ruote sono rettangoli, non cerchi: da dietro si vede il
+          battistrada. Vanno disegnate prima della scocca, che ne copre la
+          parte alta e le fa spuntare da sotto.
+        -->
+        <rect x="30" y="46" width="14" height="26" rx="3" fill={wheelColor('second')} />
+        <rect x="76" y="46" width="14" height="26" rx="3" fill={wheelColor('first')} />
         <rect
           x="26"
-          y="20"
+          y="18"
           width="68"
-          height="42"
+          height="40"
           rx="7"
           fill="var(--surface)"
           stroke={body}
@@ -85,7 +92,7 @@
         />
         <rect
           x="34"
-          y="26"
+          y="24"
           width="52"
           height="16"
           rx="3"
@@ -93,10 +100,8 @@
           stroke="var(--line)"
           stroke-width="1.5"
         />
-        <line x1="60" y1="42" x2="60" y2="58" stroke="var(--line)" stroke-width="1.5" />
-        <line x1="30" y1="56" x2="90" y2="56" stroke="var(--line)" stroke-width="2" />
-        <circle cx="34" cy="62" r="10" fill={wheelColor('second')} />
-        <circle cx="86" cy="62" r="10" fill={wheelColor('first')} />
+        <line x1="60" y1="40" x2="60" y2="52" stroke="var(--line)" stroke-width="1.5" />
+        <line x1="30" y1="52" x2="90" y2="52" stroke="var(--line)" stroke-width="2" />
       {:else}
         <!-- Profilo del Ducato, muso a destra. -->
         <path
