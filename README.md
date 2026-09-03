@@ -45,6 +45,8 @@ Due cose, una volta sola, **in quest'ordine**. Alla prima apertura l'app te le
 presenta già come due passi numerati, e ti mostra le misure attuali del camper
 proprio lì, nel momento in cui contano.
 
+<p><img src="docs/avvio.png" alt="Primo avvio: i due passi" width="300"></p>
+
 ### 1. Le misure del camper
 
 **Veicolo** → carreggiata e passo in centimetri, e quanti assi hai dietro.
@@ -56,6 +58,8 @@ proprio lì, nel momento in cui contano.
 Se le salti, l'app calcola i centimetri per un camper generico e i numeri
 saranno sbagliati senza che niente lo dica.
 
+<p><img src="docs/veicolo.png" alt="Schermata Veicolo" width="300"></p>
+
 ### 2. La calibrazione
 
 Metti il camper **davvero in piano**, con una livella a bolla vera o con i
@@ -65,8 +69,9 @@ misura futura sarà sbagliata della stessa quantità.
 Poi appoggia il telefono dove lo terrai sempre e dichiara **verso dove punta il
 muso rispetto allo schermo**. È la domanda che si capisce meno leggendola, ma
 davanti al telefono è immediata: guarda il bordo superiore dello schermo e
-chiediti dove va a finire. Le opzioni sono quattro: muso, retro, destra,
-sinistra.
+chiediti dove va a finire.
+
+<p><img src="docs/muso.png" alt="Scelta della direzione del muso" width="300"></p>
 
 Tieni fermo due secondi, dai un nome, ed è fatta.
 
