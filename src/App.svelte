@@ -26,7 +26,11 @@
   const wakeLock = new ScreenWakeLock()
 
   $effect(() => {
-    document.documentElement.dataset.night = String(app.nightMode)
+    document.documentElement.dataset.theme = app.theme
+    // La barra di stato del telefono deve seguire il tema, altrimenti sopra
+    // una app chiara resta una striscia nera.
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg)
   })
 
   // Schermo sempre acceso mentre si misura, e non un minuto di più.

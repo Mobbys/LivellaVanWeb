@@ -1,43 +1,121 @@
 /*
- * Strumento di misura usato all'aperto, al buio, spesso guardando lo schermo
- * da un metro di distanza: la leggibilità a distanza viene prima di tutto.
+ * Strumento di misura usato all'aperto, al buio o in pieno sole, spesso
+ * guardando lo schermo da un metro di distanza: la leggibilità a distanza
+ * viene prima di tutto.
+ *
+ * I temi vanno dal chiaro allo scuro. Gli ultimi due sono per la visione
+ * notturna: un solo colore su nero puro, per non bruciare l'adattamento
+ * all'oscurità mentre si sistemano i cunei.
  */
 
-:root {
+/*
+ * Ogni tema vale su qualunque elemento con data-theme, non solo sulla radice:
+ * è così che le anteprime nel selettore mostrano i propri colori invece di
+ * ereditare quelli del tema attivo.
+ */
+
+/* Notte, il tema di partenza: vale anche senza attributo. */
+:root,
+[data-theme='night'] {
   --bg: #0a0e12;
   --surface: #131920;
-  --line: #232c37;
+  --line: #2b3644;
   --text: #e8edf2;
-  --muted: #8b98a5;
+  --muted: #9aa7b4;
   --ok: #3dd68c;
   --warn: #f0a830;
   --bad: #e5484d;
   --accent: #4cc9e0;
   --on-accent: #0a0e12;
 
-  --size-xs: 0.75rem; /* 12 */
-  --size-sm: 1rem; /* 16 */
-  --size-md: 1.375rem; /* 22 */
-  --size-xl: 4rem; /* 64 */
+  color-scheme: dark;
+}
+
+/* Giorno: per leggere il telefono in pieno sole. */
+[data-theme='day'] {
+  --bg: #ffffff;
+  --surface: #eef2f6;
+  --line: #c3ceda;
+  --text: #0f151b;
+  --muted: #52616f;
+  --ok: #0b7040;
+  --warn: #8a5000;
+  --bad: #b3261e;
+  --accent: #0a6377;
+  --on-accent: #ffffff;
+
+  color-scheme: light;
+}
+
+/* Sabbia: chiaro ma caldo, meno abbagliante del bianco. */
+[data-theme='sand'] {
+  --bg: #f5efe3;
+  --surface: #eae2d2;
+  --line: #cfc3ad;
+  --text: #241f16;
+  --muted: #5d5343;
+  --ok: #2c6437;
+  --warn: #7d4f0c;
+  --bad: #9c2f22;
+  --accent: #2b6470;
+  --on-accent: #f5efe3;
+
+  color-scheme: light;
+}
+
+/* Crepuscolo: mezza via, per la luce di sera senza il contrasto duro. */
+[data-theme='dusk'] {
+  --bg: #38424e;
+  --surface: #434e5c;
+  --line: #5a6778;
+  --text: #f2f5f9;
+  --muted: #c2ccd8;
+  --ok: #6ee7a8;
+  --warn: #ffc35c;
+  --bad: #ff8f8a;
+  --accent: #7fd8ea;
+  --on-accent: #1f262e;
 
   color-scheme: dark;
 }
 
-/*
- * Modalità notte: tutto vira sul rosso su nero puro, per non bruciare
- * l'adattamento allo scuro mentre si sistemano i cunei.
- */
-:root[data-night='true'] {
+/* Ambra: visione notturna morbida, meno aggressiva del rosso. */
+[data-theme='amber'] {
   --bg: #000000;
-  --surface: #0b0000;
-  --line: #3a0f0f;
-  --text: #ff4d4d;
-  --muted: #a13232;
-  --ok: #ff4d4d;
-  --warn: #ff4d4d;
-  --bad: #ff4d4d;
-  --accent: #ff4d4d;
+  --surface: #0d0800;
+  --line: #4a3100;
+  --text: #ffb84d;
+  --muted: #c98a2e;
+  --ok: #ffb84d;
+  --warn: #ffb84d;
+  --bad: #ffb84d;
+  --accent: #ffb84d;
   --on-accent: #000000;
+
+  color-scheme: dark;
+}
+
+/* Rosso: la visione notturna vera, quella che non brucia l'adattamento. */
+[data-theme='red'] {
+  --bg: #000000;
+  --surface: #0d0000;
+  --line: #4a1414;
+  --text: #ff5c5c;
+  --muted: #d24b4b;
+  --ok: #ff5c5c;
+  --warn: #ff5c5c;
+  --bad: #ff5c5c;
+  --accent: #ff5c5c;
+  --on-accent: #000000;
+
+  color-scheme: dark;
+}
+
+:root {
+  --size-xs: 0.75rem; /* 12 */
+  --size-sm: 1rem; /* 16 */
+  --size-md: 1.375rem; /* 22 */
+  --size-xl: 4rem; /* 64 */
 }
 
 * {

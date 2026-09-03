@@ -1,11 +1,20 @@
 <script lang="ts">
   import { app } from '../store/app.svelte'
-  import { exportJson, importJson } from '../store/persist'
+  import { THEMES, exportJson, importJson, type ThemeId } from '../store/persist'
   import { isWakeLockSupported } from '../sensors/wakelock'
   import { isAudioSupported } from './beep'
 
   type Props = { ondebug: () => void }
   const { ondebug }: Props = $props()
+
+  const THEME_LABELS: Record<ThemeId, string> = {
+    day: 'Giorno',
+    sand: 'Sabbia',
+    dusk: 'Crepuscolo',
+    night: 'Notte',
+    amber: 'Ambra',
+    red: 'Rosso',
+  }
 
   let message = $state<string | null>(null)
   let error = $state<string | null>(null)
@@ -65,14 +74,24 @@
     />
   </div>
 
-  <div class="row">
-    <span>
-      Modalità notte
-      <small>Rosso su nero, per non bruciare l’adattamento allo scuro.</small>
-    </span>
-    <button class:selected={app.nightMode} onclick={() => app.setNightMode(!app.nightMode)}>
-      {app.nightMode ? 'Attiva' : 'Spenta'}
-    </button>
+  <div class="field">
+    <span class="legend">Tema, dal chiaro allo scuro</span>
+    <div class="themes">
+      {#each THEMES as id (id)}
+        <button class="theme" class:selected={app.theme === id} onclick={() => app.setTheme(id)}>
+          <!-- L'anteprima porta il proprio tema, il resto del pulsante no. -->
+          <span class="swatch" data-theme={id}>
+            <span class="ink"></span>
+            <span class="dot"></span>
+          </span>
+          {THEME_LABELS[id]}
+        </button>
+      {/each}
+    </div>
+    <small>
+      Ambra e rosso sono per il buio: un colore solo su nero, per non bruciare
+      l’adattamento all’oscurità.
+    </small>
   </div>
 
   <div class="row">
@@ -177,6 +196,52 @@
   .selected {
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .themes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .theme {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--size-xs);
+    padding: 0.5rem 0.625rem;
+  }
+
+  /*
+   * L'anteprima usa i colori del tema che rappresenta, non di quello attivo:
+   * l'attributo data-theme sul pulsante ridefinisce le variabili lì dentro.
+   */
+  .swatch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1875rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: none;
+    border-radius: 0.375rem;
+    background: var(--bg);
+    border: 1px solid var(--line);
+  }
+
+  .ink,
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+  }
+
+  .ink {
+    background: var(--text);
+  }
+
+  .dot {
+    background: var(--accent);
   }
 
   .note,

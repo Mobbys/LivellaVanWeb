@@ -9,6 +9,7 @@ import {
   type AppState,
   type Station,
   type StationQuality,
+  type ThemeId,
   type Units,
 } from './persist'
 import { createStation, findStation, stationMatrix, uniqueName } from './stations'
@@ -52,8 +53,8 @@ class AppStore {
     return this.data.toleranceDeg
   }
 
-  get nightMode(): boolean {
-    return this.data.nightMode
+  get theme(): ThemeId {
+    return this.data.theme
   }
 
   get beep(): boolean {
@@ -148,8 +149,8 @@ class AppStore {
     this.persist()
   }
 
-  setNightMode(on: boolean): void {
-    this.data.nightMode = on
+  setTheme(theme: ThemeId): void {
+    this.data.theme = theme
     this.persist()
   }
 

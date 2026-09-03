@@ -55,8 +55,14 @@ Convenzioni fissate in `src/sensors/`:
 
 Note su cose che non si vedono dal codice:
 - `AppState` ha tre campi in più rispetto alla specifica (`toleranceDeg`,
-  `nightMode`, `beep`), richiesti dalla UI ma non elencati nel modello dati.
-  La migrazione li completa sui salvataggi che non li hanno.
+  `theme`, `beep`), richiesti dalla UI ma non elencati nel modello dati.
+  La migrazione li completa sui salvataggi che non li hanno, e converte il
+  vecchio `nightMode: true` nel tema `red`.
+- I temi stanno solo in `styles/tokens.css`, come blocchi `[data-theme='…']`
+  che valgono su qualunque elemento e non solo sulla radice: è così che le
+  anteprime del selettore mostrano i propri colori. `tests/theme.test.ts`
+  legge quel file e verifica i contrasti WCAG, quindi un tema nuovo con
+  testo illeggibile non passa.
 - Il `base` di Vite è `/LivellaVanWeb/` per Pages e va azzerato con
   `APP_BASE=/` per l'APK, altrimenti dentro il guscio nativo gli asset danno
   404 e si vede una pagina bianca.

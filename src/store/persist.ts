@@ -21,6 +21,16 @@ export type Station = {
 
 export type Units = 'cm' | 'mm'
 
+/** Dal più chiaro al più scuro; gli ultimi due sono per la visione notturna. */
+export const THEMES = ['day', 'sand', 'dusk', 'night', 'amber', 'red'] as const
+
+export type ThemeId = (typeof THEMES)[number]
+
+export const DEFAULT_THEME: ThemeId = 'night'
+
+/** Il vecchio interruttore notte accendeva il rosso: si migra su quello. */
+const LEGACY_NIGHT_THEME: ThemeId = 'red'
+
 export type AppState = {
   schemaVersion: 1
   vehicle: Vehicle
@@ -29,7 +39,7 @@ export type AppState = {
   units: Units
   /** Sotto questo angolo la bolla è verde. */
   toleranceDeg: number
-  nightMode: boolean
+  theme: ThemeId
   beep: boolean
 }
 
@@ -44,7 +54,7 @@ export const defaultState = (): AppState => ({
   activeStationId: null,
   units: 'cm',
   toleranceDeg: DEFAULT_TOLERANCE_DEG,
-  nightMode: false,
+  theme: DEFAULT_THEME,
   beep: false,
 })
 
@@ -109,9 +119,20 @@ export function migrate(raw: unknown): AppState {
     activeStationId,
     units: raw.units === 'mm' ? 'mm' : 'cm',
     toleranceDeg: Math.min(5, Math.max(0.1, tolerance)),
-    nightMode: raw.nightMode === true,
+    theme: sanitizeTheme(raw),
     beep: raw.beep === true,
   }
+}
+
+/**
+ * Accetta un tema noto; altrimenti recupera il vecchio interruttore notte, che
+ * nei salvataggi precedenti significava rosso su nero.
+ */
+function sanitizeTheme(raw: Record<string, unknown>): ThemeId {
+  if (typeof raw.theme === 'string' && (THEMES as readonly string[]).includes(raw.theme)) {
+    return raw.theme as ThemeId
+  }
+  return raw.nightMode === true ? LEGACY_NIGHT_THEME : DEFAULT_THEME
 }
 
 export const newId = (): string =>
