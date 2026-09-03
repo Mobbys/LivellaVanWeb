@@ -2,6 +2,9 @@
   import { app } from '../store/app.svelte'
   import { cmToMeters, metersToCm, sanitizeVehicle } from '../store/vehicle'
 
+  type Props = { oncalibrate?: () => void }
+  const { oncalibrate }: Props = $props()
+
   let name = $state(app.vehicle.name)
   let trackWidthCm = $state(Math.round(metersToCm(app.vehicle.trackWidth)))
   let wheelbaseCm = $state(Math.round(metersToCm(app.vehicle.wheelbase)))
@@ -60,6 +63,14 @@
   </div>
 
   <button class="primary" onclick={save}>{saved ? 'Salvato' : 'Salva'}</button>
+
+  {#if app.stations.length === 0 && oncalibrate}
+    <p class="next">
+      Misure a posto. Ora metti il camper in piano e calibra la prima
+      postazione: è il passo che rende buone tutte le misure future.
+    </p>
+    <button onclick={oncalibrate}>Vai alla calibrazione</button>
+  {/if}
 </section>
 
 <style>
@@ -101,5 +112,12 @@
   .selected {
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .next {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: var(--size-xs);
+    line-height: 1.5;
   }
 </style>

@@ -4,6 +4,9 @@
   import { isWakeLockSupported } from '../sensors/wakelock'
   import { isAudioSupported } from './beep'
 
+  type Props = { ondebug: () => void }
+  const { ondebug }: Props = $props()
+
   let message = $state<string | null>(null)
   let error = $state<string | null>(null)
   let fileInput: HTMLInputElement
@@ -115,6 +118,13 @@
       chiudendo la pagina.
     </p>
   {/if}
+
+  <h2>Diagnostica</h2>
+  <p class="note">
+    Quaternione, versore verticale, qualità della sorgente e frequenza delle
+    letture in tempo reale. Serve solo se qualcosa non funziona.
+  </p>
+  <button onclick={ondebug}>Apri la diagnostica sensori</button>
 
   {#if !isWakeLockSupported()}
     <p class="note">

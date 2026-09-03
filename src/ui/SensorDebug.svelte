@@ -13,6 +13,9 @@
     type SourceAttempt,
   } from '../sensors'
 
+  type Props = { onclose: () => void }
+  const { onclose }: Props = $props()
+
   type Status = 'idle' | 'starting' | 'running' | 'failed'
 
   let status = $state<Status>('idle')
@@ -100,7 +103,10 @@
 </script>
 
 <section>
-  <h1>Debug sensori</h1>
+  <header>
+    <h1>Debug sensori</h1>
+    <button onclick={onclose}>Indietro</button>
+  </header>
 
   {#if !isSecureContextAvailable()}
     <p class="warn">
@@ -179,9 +185,17 @@
     margin: 0 auto;
   }
 
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
   h1 {
     font-size: 1.375rem;
-    margin: 0 0 1rem;
+    margin: 0;
   }
 
   h2 {

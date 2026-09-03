@@ -19,7 +19,6 @@
     { id: 'stations', label: 'Postazioni' },
     { id: 'vehicle', label: 'Veicolo' },
     { id: 'settings', label: 'Opzioni' },
-    { id: 'debug', label: 'Debug' },
   ]
 
   const wakeLock = new ScreenWakeLock()
@@ -36,22 +35,22 @@
 </script>
 
 {#if view === 'level'}
-  <Level oncalibrate={() => (view = 'calibrate')} />
+  <Level oncalibrate={() => (view = 'calibrate')} onvehicle={() => (view = 'vehicle')} />
 {:else if view === 'stations'}
   <Stations oncalibrate={() => (view = 'calibrate')} ontransfer={() => (view = 'transfer')} />
 {:else if view === 'vehicle'}
-  <Vehicle />
+  <Vehicle oncalibrate={() => (view = 'calibrate')} />
 {:else if view === 'settings'}
-  <Settings />
+  <Settings ondebug={() => (view = 'debug')} />
 {:else if view === 'calibrate'}
   <CalibrateWizard onclose={() => (view = 'stations')} />
 {:else if view === 'transfer'}
   <TransferWizard onclose={() => (view = 'stations')} />
 {:else}
-  <SensorDebug />
+  <SensorDebug onclose={() => (view = 'settings')} />
 {/if}
 
-{#if view !== 'calibrate' && view !== 'transfer'}
+{#if view !== 'calibrate' && view !== 'transfer' && view !== 'debug'}
   <nav>
     {#each tabs as tab (tab.id)}
       <button class:active={view === tab.id} onclick={() => (view = tab.id)}>{tab.label}</button>

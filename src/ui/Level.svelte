@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { attitude, axleLift, sideLift, wheelLifts, type Wheels } from '../core/leveling'
+  import {
+    attitude,
+    axleLift,
+    metersToCm,
+    sideLift,
+    wheelLifts,
+    type Wheels,
+  } from '../core/leveling'
   import { matMulVec, radToDeg } from '../core/vec'
   import { app } from '../store/app.svelte'
   import { orientation } from '../store/orientation.svelte'
@@ -8,8 +15,8 @@
   import { LevelBeeper } from './beep'
   import { formatDegrees, formatLift, liftValue, unitLabel } from './format'
 
-  type Props = { oncalibrate: () => void }
-  const { oncalibrate }: Props = $props()
+  type Props = { oncalibrate: () => void; onvehicle: () => void }
+  const { oncalibrate, onvehicle }: Props = $props()
 
   const matrix = $derived(app.activeMatrix)
   const upVehicle = $derived(matrix === null ? null : matMulVec(matrix, orientation.up))
@@ -93,13 +100,31 @@
   {/if}
 
   {#if app.stations.length === 0}
-    <!-- Niente bolle finte: senza calibrazione non c'è nulla da mostrare. -->
+    <!-- Niente bolle finte: senza calibrazione non c'è nulla da mostrare.
+         I due passi sono in quest'ordine perché le misure del camper servono
+         già al primo risultato: senza, i centimetri sono di un camper generico. -->
     <div class="empty">
-      <p>
-        Nessuna postazione calibrata. Appoggia il telefono dove lo terrai e
-        insegnagli, una volta sola, come è messo rispetto al telaio.
-      </p>
-      <button class="primary" onclick={oncalibrate}>Calibra la prima postazione</button>
+      <p>Due cose da fare una volta sola, in quest'ordine.</p>
+
+      <div class="step">
+        <h2><span class="num">1</span> Controlla le misure del camper</h2>
+        <p>
+          Carreggiata {Math.round(metersToCm(app.vehicle.trackWidth))} cm, passo
+          {Math.round(metersToCm(app.vehicle.wheelbase))} cm,
+          {app.vehicle.rearAxles === 2 ? 'due assi dietro' : 'un asse dietro'}.
+          Se non sono le tue, i centimetri di rialzo saranno sbagliati.
+        </p>
+        <button onclick={onvehicle}>Correggi le misure</button>
+      </div>
+
+      <div class="step">
+        <h2><span class="num">2</span> Metti il camper in piano e calibra</h2>
+        <p>
+          Serve una livella a bolla vera, o i martinetti. Da lì in poi basta
+          appoggiare il telefono e leggere.
+        </p>
+        <button class="primary" onclick={oncalibrate}>Calibra la prima postazione</button>
+      </div>
     </div>
   {:else}
     <label class="selector">
@@ -212,10 +237,46 @@
     gap: 0.75rem;
   }
 
-  .empty p {
+  .empty > p {
     margin: 0;
     color: var(--muted);
     line-height: 1.5;
+  }
+
+  .step {
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .step h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: var(--size-sm);
+  }
+
+  .step p {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--size-xs);
+    line-height: 1.5;
+  }
+
+  .num {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: var(--size-xs);
+    font-weight: 700;
   }
 
   .note {
