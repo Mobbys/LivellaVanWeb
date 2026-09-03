@@ -32,7 +32,7 @@
 
   // Con il tandem le due ruote posteriori dello stesso lato vanno alzate
   // insieme: il numero è uno solo, in mezzo alla coppia.
-  const rearY = $derived(vehicle.rearAxles === 2 ? 188 : 178)
+  const rearY = $derived(vehicle.rearAxles === 2 ? 188 : 194)
 </script>
 
 <figure>
@@ -86,8 +86,8 @@
       <rect x="172" y="150" width="18" height="28" rx="5" fill="var(--line)" />
       <rect x="172" y="182" width="18" height="28" rx="5" fill="var(--line)" />
     {:else}
-      <rect x="70" y="154" width="18" height="34" rx="5" fill="var(--line)" />
-      <rect x="172" y="154" width="18" height="34" rx="5" fill="var(--line)" />
+      <rect x="70" y="170" width="18" height="34" rx="5" fill="var(--line)" />
+      <rect x="172" y="170" width="18" height="34" rx="5" fill="var(--line)" />
     {/if}
     <text x="60" y={rearY} class="value" text-anchor="end" fill={tone('rearLeft')}>
       {value('rearLeft')}
