@@ -41,7 +41,9 @@ precisione della versione web, cambia solo il modo di distribuirla.
 
 ## Primo setup
 
-Due cose, una volta sola, **in quest'ordine**.
+Due cose, una volta sola, **in quest'ordine**. Alla prima apertura l'app te le
+presenta già come due passi numerati, e ti mostra le misure attuali del camper
+proprio lì, nel momento in cui contano.
 
 ### 1. Le misure del camper
 
@@ -60,13 +62,21 @@ Metti il camper **davvero in piano**, con una livella a bolla vera o con i
 martinetti. È il passo che conta: se il camper non è in piano adesso, ogni
 misura futura sarà sbagliata della stessa quantità.
 
-Poi **Postazioni → Nuova calibrazione in bolla**: appoggia il telefono dove lo
-terrai sempre, dichiara verso dove punta il muso rispetto allo schermo, tieni
-fermo due secondi, dai un nome.
+Poi appoggia il telefono dove lo terrai sempre e dichiara **verso dove punta il
+muso rispetto allo schermo**. È la domanda che si capisce meno leggendola, ma
+davanti al telefono è immediata: guarda il bordo superiore dello schermo e
+chiediti dove va a finire. Le opzioni sono quattro: muso, retro, destra,
+sinistra.
+
+Tieni fermo due secondi, dai un nome, ed è fatta.
 
 Il telefono deve stare appoggiato **quasi in piano**: fino a 78° di
 inclinazione va bene, oltre la calibrazione è matematicamente impossibile e
 viene rifiutata.
+
+Se la barra non parte, sotto trovi l'oscillazione misurata e la soglia che
+serve: dopo otto secondi l'app propone di misurare comunque, perché su certi
+telefoni il rumore del sensore non scende mai sotto quel valore.
 
 ## Come si usa in piazzola
 
