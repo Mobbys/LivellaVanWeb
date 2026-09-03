@@ -58,13 +58,19 @@
 </script>
 
 <figure>
-  <svg viewBox="0 0 120 96" role="img" aria-label="{label} {text} gradi">
+  <!--
+    Le due viste condividono la stessa scala in altezza: il camper è alto 40
+    unità in entrambe. Da dietro è largo 32 (2,05 m contro 2,55 m di altezza,
+    cioè più alto che largo come il mezzo vero); di lato è lungo 82, che sulla
+    stessa altezza è il rapporto di un L2H2.
+  -->
+  <svg viewBox="0 0 120 80" role="img" aria-label="{label} {text} gradi">
     <!-- Riferimento orizzontale: è il piano, non il camper. -->
     <line
       x1="4"
-      y1="74"
+      y1="62"
       x2="116"
-      y2="74"
+      y2="62"
       stroke="var(--line)"
       stroke-width="2"
       stroke-dasharray="4 4"
@@ -73,58 +79,57 @@
     <g transform="rotate({-drawn} 60 62)">
       {#if view === 'rear'}
         <!--
-          Camper visto da dietro: sinistra e destra come nello schema ruote.
-          Le ruote sono rettangoli, non cerchi: da dietro si vede il
-          battistrada. Vanno disegnate prima della scocca, che ne copre la
-          parte alta e le fa spuntare da sotto.
+          Da dietro il Ducato è più alto che largo: 2,55 m contro 2,05, cioè
+          40 unità di larghezza per 50 di altezza fino a terra. Le ruote sono
+          rettangoli, disegnati sotto la scocca che ne copre la parte alta.
         -->
-        <rect x="30" y="46" width="14" height="26" rx="3" fill={wheelColor('second')} />
-        <rect x="76" y="46" width="14" height="26" rx="3" fill={wheelColor('first')} />
+        <rect x="42" y="44" width="6" height="18" rx="1.5" fill={wheelColor('second')} />
+        <rect x="72" y="44" width="6" height="18" rx="1.5" fill={wheelColor('first')} />
         <rect
-          x="26"
-          y="18"
-          width="68"
+          x="40"
+          y="12"
+          width="40"
           height="40"
-          rx="7"
+          rx="5"
           fill="var(--surface)"
           stroke={body}
-          stroke-width="2.5"
+          stroke-width="2"
         />
         <rect
-          x="34"
-          y="24"
-          width="52"
-          height="16"
-          rx="3"
+          x="44"
+          y="17"
+          width="32"
+          height="13"
+          rx="2"
           fill="none"
           stroke="var(--line)"
-          stroke-width="1.5"
+          stroke-width="1.2"
         />
-        <line x1="60" y1="40" x2="60" y2="52" stroke="var(--line)" stroke-width="1.5" />
-        <line x1="30" y1="52" x2="90" y2="52" stroke="var(--line)" stroke-width="2" />
+        <line x1="60" y1="30" x2="60" y2="46" stroke="var(--line)" stroke-width="1.2" />
+        <line x1="42" y1="46" x2="78" y2="46" stroke="var(--line)" stroke-width="1.5" />
       {:else}
-        <!-- Profilo del Ducato, muso a destra. -->
+        <!-- Profilo, muso a destra: 84 unità di lunghezza sulla stessa altezza. -->
         <path
-          d="M18 20 H84 L96 38 L106 42 Q110 43 110 48 V57 Q110 62 105 62 H18 Q13 62 13 57 V25
-             Q13 20 18 20 Z"
+          d="M23 19 H73 L88 38 L97 41 Q102 42 102 47 V49 Q102 54 97 54 H23 Q18 54 18 49 V24
+             Q18 19 23 19 Z"
           fill="var(--surface)"
           stroke={body}
-          stroke-width="2.5"
+          stroke-width="2"
           stroke-linejoin="round"
         />
-        <path d="M85 24 L95 38 H85 Z" fill="none" stroke="var(--line)" stroke-width="1.5" />
+        <path d="M74 22 L86 38 H74 Z" fill="none" stroke="var(--line)" stroke-width="1.2" />
         <rect
-          x="24"
-          y="26"
-          width="30"
-          height="14"
-          rx="3"
+          x="27"
+          y="24"
+          width="32"
+          height="13"
+          rx="2"
           fill="none"
           stroke="var(--line)"
-          stroke-width="1.5"
+          stroke-width="1.2"
         />
-        <circle cx="32" cy="62" r="10" fill={wheelColor('second')} />
-        <circle cx="92" cy="62" r="10" fill={wheelColor('first')} />
+        <circle cx="36" cy="56" r="6" fill={wheelColor('second')} />
+        <circle cx="88" cy="56" r="6" fill={wheelColor('first')} />
       {/if}
     </g>
   </svg>
