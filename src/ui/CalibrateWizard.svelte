@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CalibrationError, calibrateStation, type NoseDirection } from '../core/calibration'
-  import { averageDirection } from '../core/filter'
+  import { DEFAULT_STABILITY_THRESHOLD_DEG, averageDirection } from '../core/filter'
   import type { Mat3, Vec3 } from '../core/vec'
   import { app } from '../store/app.svelte'
   import { orientation } from '../store/orientation.svelte'
@@ -11,6 +11,12 @@
   type Step = 'level' | 'nose' | 'measure' | 'name'
 
   const MEASURE_MS = 2000
+  /**
+   * Dopo questo tempo senza che la lettura si fermi, si offre di misurare lo
+   * stesso: su certi telefoni il rumore del sensore non scende mai sotto la
+   * soglia, e restare davanti a una barra che non parte non aiuta nessuno.
+   */
+  const PATIENCE_MS = 8000
 
   const NOSE_OPTIONS: { value: NoseDirection; label: string }[] = [
     { value: 'top', label: 'Bordo superiore verso il muso' },
@@ -29,6 +35,11 @@
   let frame = 0
   let samples: Vec3[] = []
   let startedAt = 0
+  let enteredAt = 0
+  let forced = $state(false)
+  let waited = $state(0)
+
+  const impatient = $derived(waited > PATIENCE_MS && !forced)
 
   function beginMeasure(chosen: NoseDirection): void {
     nose = chosen
@@ -36,14 +47,20 @@
     step = 'measure'
     samples = []
     progress = 0
+    forced = false
+    waited = 0
     startedAt = performance.now()
+    enteredAt = startedAt
     frame = requestAnimationFrame(collect)
   }
 
   function collect(): void {
+    waited = performance.now() - enteredAt
+
     // La misura vale solo se il telefono resta fermo: al primo tremolio si
-    // riparte da zero, invece di mediare un movimento.
-    if (!orientation.stable) {
+    // riparte da zero, invece di mediare un movimento. Con «misura comunque»
+    // si accetta il rumore, che la media di 2 secondi in buona parte cancella.
+    if (!orientation.stable && !forced) {
       samples = []
       startedAt = performance.now()
       progress = 0
@@ -124,8 +141,25 @@
       <div class="fill" style:width="{progress * 100}%"></div>
     </div>
     <p class="note">
-      {orientation.stable ? 'Lettura ferma.' : 'Lettura in movimento: la misura riparte quando il telefono si ferma.'}
+      {#if orientation.stable || forced}
+        Lettura ferma. Non toccare il telefono.
+      {:else}
+        Lettura in movimento: la misura riparte quando il telefono si ferma.
+      {/if}
+      Oscillazione attuale {Number.isFinite(orientation.spreadDeg)
+        ? orientation.spreadDeg.toLocaleString('it-IT', { maximumFractionDigits: 3 })
+        : '—'}°, serve sotto {DEFAULT_STABILITY_THRESHOLD_DEG.toLocaleString('it-IT')}°.
     </p>
+
+    {#if impatient}
+      <p class="warn">
+        Il telefono non si ferma abbastanza. Se è già appoggiato e immobile, è
+        il rumore del suo sensore a non scendere sotto la soglia: puoi misurare
+        lo stesso, la media di 2 secondi cancella gran parte del disturbo.
+      </p>
+      <button onclick={() => (forced = true)}>Misura comunque</button>
+    {/if}
+
     <button onclick={cancelMeasure}>Interrompi</button>
   {:else}
     <p>Misura acquisita. Dai un nome a questa postazione.</p>

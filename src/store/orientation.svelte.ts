@@ -6,7 +6,7 @@
 
 import { StabilityDetector, UpFilter } from '../core/filter'
 import { quaternionToMatrix, type Quat } from '../core/orientation'
-import { identity, type Mat3, type Vec3 } from '../core/vec'
+import { identity, radToDeg, type Mat3, type Vec3 } from '../core/vec'
 import {
   createOrientationSource,
   explainSensorError,
@@ -32,6 +32,8 @@ class OrientationStore {
   quaternion = $state<Quat | null>(null)
   quality = $state<SensorQuality>('tilt-only')
   stable = $state(false)
+  /** Dispersione della lettura in gradi: quanto trema il telefono adesso. */
+  spreadDeg = $state(Infinity)
   samples = $state(0)
   sourceLabel = $state('—')
 
@@ -109,11 +111,7 @@ class OrientationStore {
 
     this.stability.push(source.up, now / 1000)
     this.stable = this.stability.stable
-  }
-
-  /** Media della finestra ferma: è la lettura che si salva in calibrazione. */
-  averageUp(): Vec3 {
-    return this.stability.average()
+    this.spreadDeg = radToDeg(this.stability.spread)
   }
 }
 
