@@ -26,7 +26,8 @@ export const THEMES = ['day', 'sand', 'dusk', 'night', 'amber', 'red'] as const
 
 export type ThemeId = (typeof THEMES)[number]
 
-export const DEFAULT_THEME: ThemeId = 'night'
+/** Chiaro all'apertura: si legge in pieno sole, che è dove si parcheggia. */
+export const DEFAULT_THEME: ThemeId = 'day'
 
 /** Il vecchio interruttore notte accendeva il rosso: si migra su quello. */
 const LEGACY_NIGHT_THEME: ThemeId = 'red'

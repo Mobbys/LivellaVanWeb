@@ -77,7 +77,7 @@ describe('migrazione dello stato salvato', () => {
     expect(migrated.vehicle).toEqual({ trackWidth: 2.1, wheelbase: 3.9, rearAxles: 2, name: 'Ducato' })
     expect(migrated.units).toBe('mm')
     expect(migrated.toleranceDeg).toBe(1)
-    expect(migrated.theme).toBe('night')
+    expect(migrated.theme).toBe('day')
     expect(migrated.beep).toBe(false)
   })
 
@@ -114,17 +114,17 @@ describe('migrazione dello stato salvato', () => {
 })
 
 describe('temi', () => {
-  it('un salvataggio senza tema parte da quello scuro', () => {
-    expect(migrate({}).theme).toBe('night')
+  it('un salvataggio senza tema parte da quello chiaro', () => {
+    expect(migrate({}).theme).toBe('day')
   })
 
   it('il vecchio interruttore notte diventa il tema rosso', () => {
     expect(migrate({ nightMode: true }).theme).toBe('red')
-    expect(migrate({ nightMode: false }).theme).toBe('night')
+    expect(migrate({ nightMode: false }).theme).toBe('day')
   })
 
   it('un tema sconosciuto non manda la app in un aspetto senza colori', () => {
-    expect(migrate({ theme: 'fucsia' }).theme).toBe('night')
+    expect(migrate({ theme: 'fucsia' }).theme).toBe('day')
   })
 
   it('un tema noto sopravvive al giro di salvataggio', () => {
